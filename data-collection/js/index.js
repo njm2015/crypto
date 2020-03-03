@@ -1,18 +1,38 @@
-const Nomics = require('nomics');
+const axios = require('axios');
+const csv = require('csv-parser');
+const fs = require('fs');
 
-console.log(Nomics)
+const apiKey = 'key=040639f478bc2578a18b992f06b6e3da&';
+const tickerURL = 'https://api.nomics.com/v1/currencies/ticker?';
+const interval = '&interval=1d';
+const ids = 'ids=';
 
-const nomics = Nomics({
-	apiKey: '040639f478bc2578a18b992f06b6e3da'
-});
 
-async function client() {
-	const currencies = await nomics.currenciesTicker({
-		ids: ['BTC', 'ETH'],
-		interval: ['1d']
-	});
+let symbolList = []
 
-	console.log(currencies);
+function generateURL() {
+	return tickerURL + apiKey + ids + symbolList.join(',') + interval;
 }
 
-client();
+
+async function getTicker() {
+
+	url = generateURL();
+
+	axios.get(url)
+		.then(res => {
+			console.log(res.data);
+		});
+}
+
+
+
+fs.createReadStream('../symbols.txt')
+	.pipe(csv())
+	.on('data', (row) => {
+		symbolList.push(row.Symbol);
+	})
+	.on('end', () => {
+		console.log('finished');
+		setInterval(getTicker, 1000 * 10);
+	});

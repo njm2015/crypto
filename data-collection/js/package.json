@@ -10,6 +10,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "nomics": "^0.5.1"
+    "axios": "^0.19.2",
+    "csv-parser": "^2.3.2",
+    "fs": "0.0.1-security"
   }
 }
