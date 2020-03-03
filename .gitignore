@@ -1,1 +1,3 @@
-./**/node_modules
+data-collection/js/node_modules
+
+data-collection/js/package-lock.json
