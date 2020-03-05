@@ -45,6 +45,9 @@ function generateURL() {
 }
 
 
+
+
+
 async function getTicker() {
 
 	url = generateURL();
@@ -90,6 +93,12 @@ async function insert(values) {
 		console.log(err.stack);
 	}
 }
+
+
+process.on('SIGTERM', () => {
+	pool.end();
+	process.exit(0);
+});
 
 
 fs.createReadStream('../symbols.txt')
