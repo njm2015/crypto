@@ -53,7 +53,7 @@ async function createTable() {
 	}
 }
 
-async function insert(values) {
+async function insert(client, values) {
 	try {
 		const res = await client.query(insertQuery, values);
 		console.log(res);
@@ -98,13 +98,13 @@ async function resetTable() {
 		console.log(err.stack);
 	}
 
-	try {
-		await client.end();
-	} catch (err) {
-		console.log(err.stack);
-	}
+	// try {
+	// 	await client.end();
+	// } catch (err) {
+	// 	console.log(err.stack);
+	// }
 }
 
-// resetTable();
+resetTable();
 // insert(['BTK', '2020-03-05T00:00:00Z', 0.00458624, 538.6]);
-queryAll();
+setTimeout(queryAll, 2000);
