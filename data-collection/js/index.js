@@ -59,14 +59,18 @@ async function getTicker() {
 			try {
 				pool.connect((err, client, done) => {
 					if (err) logger.error(err.stack);
-
+					
 					res.data.forEach(async c => {
-						client.query(insertQuery, [
-							c.symbol,
-							timestamp,
-							parseFloat(c.price),
-							parseFloat(c['1h'].volume)
-						]);
+						try {
+							client.query(insertQuery, [
+								c.symbol,
+								timestamp,
+								parseFloat(c.price),
+								parseFloat(c['1h'].volume)
+							]);
+						} catch (err) {
+							logger.error(`Couldn't log ${c.symbol}...`);
+						}
 					});
 
 					done();
