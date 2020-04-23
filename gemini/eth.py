@@ -9,8 +9,8 @@ import websocket
 from psycopg2.pool import SimpleConnectionPool
 from contextlib import contextmanager
 
-SYMBOL='BTC'
-URL_PARAM = SYMBOL + 'USD'
+SYMBOL='ETH'
+URL_PARAM='ETHUSD'
 
 logging.basicConfig(filename='./log/{}.log'.format(SYMBOL.lower()), level=logging.DEBUG)
 

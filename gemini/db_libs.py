@@ -64,26 +64,64 @@ if __name__ == '__main__':
 	import psycopg2
 	import sys
 
-	symbol = 'btc'
+	symbol = sys.argv[1]
+	print('resetting {}...'.format(symbol))
 
 	connect_dsn = "dbname='crypto' user='{}' host='localhost' password='{}'".format(os.environ.get('DBUSER'), os.environ.get('DBPWD'))
 
 	try:
-		conn = psycopg2.connect(connect_dsn)
-	except:
-		print('unable to create db connection')
+		try:
+			conn = psycopg2.connect(connect_dsn)
+		except:
+			print('unable to create db connection')
 
-	cur = conn.cursor()
+		cur = conn.cursor()
 
-	try:
-		cur.execute(bid_ask_drop_str.format(symbol))
-		cur.execute(bid_ask_create_str.format(symbol))
+		# bid-ask tables
 
-		cur.execute(trade_drop_str.format(symbol))
-		cur.execute(trade_create_str.format(symbol))
+		try:
+			# db doesn't exist
+			cur.execute(bid_ask_drop_str.format(symbol))
+		except:
+			conn.rollback()
+			print(sys.exc_info()[0])
+			print(87)
+
+
+		try:
+			# db doesn't exist
+			cur.execute(bid_ask_create_str.format(symbol))
+		except:
+			print(sys.exc_info()[0])
+			print(95)
 
 		conn.commit()
+
+		# trade tables
+
+		try:
+			# db doesn't exist
+			cur.execute(trade_drop_str.format(symbol))
+		except:
+			conn.rollback()
+			print(sys.exc_info()[0])
+			print(105)
+
+		try:
+			# db doesn't exist
+			cur.execute(trade_create_str.format(symbol))
+		except:
+			print(sys.exc_info()[0])
+			print(112)
+
+		
+		conn.commit()
 		conn.close()
+
 	except:
-		print('unable to execute query')
+		conn.rollback()
+		conn.close()
 		print(sys.exc_info()[0])
+
+
+
