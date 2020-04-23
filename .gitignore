@@ -3,3 +3,9 @@ data-collection/js/node_modules
 data-collection/js/package-lock.json
 
 data-collection/js/logs
+
+gemini/log
+
+gemini/__pycache__
+
+analysis
