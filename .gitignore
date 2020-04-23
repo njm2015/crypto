@@ -4,7 +4,7 @@ data-collection/js/package-lock.json
 
 data-collection/js/logs
 
-gemini/log
+**.log
 
 gemini/__pycache__
 
