@@ -1,1 +1,0 @@
-only including this file so git adds the log folder.
