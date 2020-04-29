@@ -38,30 +38,33 @@ socket.addEventListener('message', event => {
 
 		let q;
 
-		if (c.type === 'trade') {
-			q = query.trade_insert(
-					SYMBOL.toLowerCase(),
-					msgData.timestampms,
-					c.makerSide === 'ask',
-					c.price,
-					c.amount
-				);
-		} else {
-			q = query.bid_ask_insert(
-					SYMBOL.toLowerCase(),
-					c.side === 'ask',
-					c.price,
-					c.remaining
-				);
-		}
+		if (c.reason !== 'initial') {
 
-		pool
-			.query(q)
-			.catch(err => {
-				logger.error(err.stack);
-				logger.error(c);
-				logger.error(q);
-			});
+			if (c.type === 'trade') {
+				q = query.trade_insert(
+						SYMBOL.toLowerCase(),
+						msgData.timestampms,
+						c.makerSide === 'ask',
+						c.price,
+						c.amount
+					);
+			} else {
+				q = query.bid_ask_insert(
+						SYMBOL.toLowerCase(),
+						c.side === 'ask',
+						c.price,
+						c.remaining
+					);
+			}
+
+			pool
+				.query(q)
+				.catch(err => {
+					logger.error(err.stack);
+					logger.error(c);
+					logger.error(q);
+				});
+		}
 
 	});
 });

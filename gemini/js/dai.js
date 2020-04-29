@@ -3,7 +3,7 @@ const { Pool, Client } = require('pg');
 const WebSocket = require('ws');
 const winston = require('winston');
 
-const SYMBOL = 'BTC';
+const SYMBOL = 'DAI';
 const URL_PARAM = SYMBOL + 'USD';
 
 const logger = winston.createLogger({

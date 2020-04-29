@@ -9,3 +9,5 @@ data-collection/js/logs
 gemini/__pycache__
 
 analysis
+
+node_modules/
