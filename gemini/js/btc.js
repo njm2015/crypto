@@ -63,6 +63,7 @@ socket.addEventListener('message', event => {
 					logger.error(err.stack);
 					logger.error(c);
 					logger.error(q);
+					pool.end().then(() => process.exit())
 				});
 		}
 
