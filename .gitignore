@@ -11,3 +11,5 @@ gemini/__pycache__
 analysis
 
 node_modules/
+
+gemini/go/src/
