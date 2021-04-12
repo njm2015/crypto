@@ -4,23 +4,32 @@ import psycopg2
 import os
 import random
 
+# conn = psycopg2.connect(
+# 	host="localhost",
+# 	database=os.environ.get('DBNAME'),
+# 	user=os.environ.get('DBUSER'),
+# 	password=os.environ.get('DBPWD')
+# )
+
 conn = psycopg2.connect(
-	host="localhost",
-	database=os.environ.get('DBNAME'),
+	host='10.0.1.100',
+	database='datager',
 	user=os.environ.get('DBUSER'),
 	password=os.environ.get('DBPWD')
 )
 
+
 cur = conn.cursor()
 
-tbl_names = ['binance_ltc_bid_ask']
+# tbl_names = ['binance_ltc_bid_ask']
 # tbl_names = ['binance_eth_bid_ask']
-# tbl_names = ['binance_btc_bid_ask']
+tbl_names = ['binance_btc_bid_ask']
 # tbl_names = ['binance_test_bid_ask']
 rows = []
 
 for tbl in tbl_names:
-	cur.execute('SELECT bidprice, bidqty, askprice, askqty FROM {} ORDER BY ts'.format(tbl))
+	# cur.execute('SELECT bidprice, bidqty, askprice, askqty FROM {} ORDER BY ts'.format(tbl))
+	cur.execute("SELECT bidprice, bidqty, askprice, askqty FROM {} WHERE ts > '2021-01-25 02:11:36' order by ts".format(tbl))
 	rows.append(cur.fetchall())
 
 def round_decimals_down(number:float, decimals:int=2):
@@ -126,19 +135,19 @@ class Algo:
 
 
 		## Uncomment to implement idle times
-		# mie = self.max_idle_empty_high
-		# mif = self.max_idle_full_high
+		mie = self.max_idle_empty_high
+		mif = self.max_idle_full_high
 
-		# max_idle_empty_s = self.max_idle_empty(mie)
-		# max_idle_full_s = self.max_idle_full(mif)
+		max_idle_empty_s = self.max_idle_empty(mie)
+		max_idle_full_s = self.max_idle_full(mif)
 
-		# if max_idle_empty_s is not None:
-		# 	self.buy(max_idle_empty_s, ask)
-		# 	self.wallet[max_idle_empty_s,4] = 0
+		if max_idle_empty_s is not None:
+			self.buy(max_idle_empty_s, ask)
+			self.wallet[max_idle_empty_s,4] = 0
 
-		# if max_idle_full_s is not None:
-		# 	self.sell(max_idle_full_s, bid)
-		# 	self.wallet[max_idle_full_s,4] = 0
+		if max_idle_full_s is not None:
+			self.sell(max_idle_full_s, bid)
+			self.wallet[max_idle_full_s,4] = 0
 
 
 	def min_slot(self, ask):
@@ -274,11 +283,16 @@ class Algo:
 			self.wallet[max_s,2] = 0.0
 
 
-	def liquidate(self, ask):
-		return self.wallet[:,1].sum() + self.wallet[:,2].sum() * ask + self.wallet[:,3].sum() + self.external_excess
+	def liquidate(self, bid):
+		# You can sell immediately at bid
+		return self.wallet[:,1].sum() + self.wallet[:,2].sum() * bid + self.wallet[:,3].sum() + self.external_excess
 
 
 	def rebalance(self):
+
+		print('rebalancing....')
+		print(self.wallet[:,3].sum())
+
 		total_excess = self.wallet[:,3].sum()
 		slot_addition = round_decimals_down(round_decimals_down(total_excess / 2, 2) / self.wallet.shape[0], 2)
 		self.external_excess += total_excess - (slot_addition * self.wallet.shape[0])
@@ -294,6 +308,8 @@ class Algo:
 				slot[0] = new_price
 				slot[3] = 0.0
 			else:
+				## New code
+				# amount_sold = slot[0] * 
 				slot[3] = slot_addition
 
 
@@ -306,11 +322,14 @@ class Algo:
 
 # 	print(idle)
 algo = Algo(
-	total_avail=1100, 
-	max_avail=11.0, 
+	slots=100,
+	total_avail=1500, 
+	max_avail=15.0, 
 	maker=0.00075, 
-	padding=0.03, 
-	undercut=0.0
+	padding=0.02, 
+	undercut=0.0,
+	max_idle_full_high=8640 * 3,
+	max_idle_empty_high=8640 * 3
 )
 
 for i, row in enumerate(rows[0]):
@@ -318,7 +337,6 @@ for i, row in enumerate(rows[0]):
 		algo.tick(row[0], row[2], rows[0][i-60][0])
 	else:
 		algo.tick(row[0], row[2], None)
-	ask = row[2]
 
 	if i > 0 and i % (8640 * 1) == 0:
 		algo.rebalance()
@@ -327,10 +345,10 @@ for i, row in enumerate(rows[0]):
 # for row in algo.wallet:
 # 	print(row[:4])
 
-print('liquidity:\t {}'.format(algo.liquidate(ask)))
+print('liquidity:\t {}'.format(algo.liquidate(rows[0][-1][0])))
 print('excess:\t\t {}'.format(algo.wallet[:,3].sum()))
 # print(algo.wallet[:,3].sum() * ask)
-print('buy & hold amt:\t {}'.format(((1100 / rows[0][0][2]) * 0.999) * rows[0][-1][0] * 0.999))
+print('buy & hold amt:\t {}'.format(((1500 / rows[0][0][2]) * 0.999) * rows[0][-1][0] * 0.999))
 print('# Buys: \t{}'.format(len(algo.buy_log)))
 print('# Sells: \t{}'.format(len(algo.sell_log)))
 print('External Excess:\t{}'.format(algo.external_excess))
