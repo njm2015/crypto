@@ -13,3 +13,6 @@ analysis
 node_modules/
 
 gemini/go/src/
+
+**/__pycache__
+**/*.db
