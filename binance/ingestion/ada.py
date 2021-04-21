@@ -21,6 +21,7 @@ while True:
 	res = requests.get('https://api.binance.us/api/v3/ticker/bookTicker', headers=headers, params=params)
 
 	res_json = res.json()
+	print(res_json)
 
 	cursor = conn.cursor()
 	cursor.execute('''
